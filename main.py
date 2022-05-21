@@ -3,8 +3,7 @@ import logging
 import os
 import json
 import random
-import pyrebase
-
+import urllib.request
 
 from flask import Flask, redirect, render_template, request
 
@@ -17,50 +16,47 @@ CLOUD_STORAGE_BUCKET = os.environ.get("CLOUD_STORAGE_BUCKET")
 
 
 app = Flask(__name__)
-
-#connect to db
-config = {
-    "apiKey": "AIzaSyAU91eIFsRIXmCNa3i7p3QltIy8WahvR-w",
-    "authDomain": "capstone-project-test-7c88a.firebaseapp.com",
-    "projectId": "capstone-project-test-7c88a",
-    "storageBucket": "capstone-project-test-7c88a.appspot.com",
-    "messagingSenderId": "844740250387",
-    "appId": "1:844740250387:web:52dda9bbae8fbcd163a8e6",
-    "measurementId": "G-RPZKSP3TGV",
-    "databaseURL":"https://capstone-project-test-7c88a-default-rtdb.asia-southeast1.firebasedatabase.app/"
-}
-firebase = pyrebase.initialize_app(config)
-db = firebase.database()
+link_affiliation = 'https://insul-in-default-rtdb.firebaseio.com/affiliation_product.json'
+link_article = 'https://insul-in-default-rtdb.firebaseio.com/article.json'
 
 @app.route("/")
 def homepage():
     userData ={
         "result_diagnose":bool(random.getrandbits(1)),
-        "error":bool(random.getrandbits(1)),
-        "message":random.choice(["success", "unauthorized"])
+        "error":bool(0),
+        "message":"success"
     }
 
     json_user = json.dumps(userData)
     json_loadUser= json.loads(json_user)
 
     if json_loadUser["result_diagnose"] == False:
-        #reading data from DB
-        json_article = db.child("Article").get()
 
-        merged_result = { **json_loadUser, **json_article.val()}
-        result= json.dumps(merged_result, sort_keys=False)
-        final_result= json.loads(result)
-
-        return final_result
+        #reading data from url
+        with urllib.request.urlopen(link_article) as url:
+            article = json.loads(url.read().decode())
+            i = list(range(3))
+            article_list = [article[0], article[1], article[2], article[3], article[4]]
+            x = {}
+            x["article"] = random.sample(article_list, len(i))
+            merged_result = { **json_loadUser, **x}
+            result= json.dumps(merged_result)
+            final_result= json.loads(result)
+            return final_result
 
     elif json_loadUser["result_diagnose"] == True:
-        json_affiliation_product = db.child("Affiliation Product").get()
 
-        merged_result = { **json_loadUser, **json_affiliation_product.val()}
-        result= json.dumps(merged_result, sort_keys=False)
-        final_result= json.loads(result)
-
-        return final_result
+        #reading data from url
+        with urllib.request.urlopen(link_affiliation) as url:
+            affiliation = json.loads(url.read().decode())
+            i = list(range(3))
+            affiliation_list = [affiliation[0], affiliation[1], affiliation[2], affiliation[3], affiliation[4], affiliation[5]]
+            x = {}
+            x["affiliation_product"] = random.sample(affiliation_list, len(i))
+            merged_result = { **json_loadUser, **x}
+            result= json.dumps(merged_result)
+            final_result= json.loads(result)
+            return final_result
 
 @app.errorhandler(500)
 def server_error(e):
