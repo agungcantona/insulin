@@ -1,64 +1,47 @@
 from datetime import datetime
+
 import logging
 import os
 import json
 import random
 import urllib.request
+
 from flask import Flask, redirect, render_template, request
+
 from google.cloud import datastore
 from google.cloud import storage
 from google.cloud import vision
 
-
+app = Flask(__name__)
 CLOUD_STORAGE_BUCKET = os.environ.get("CLOUD_STORAGE_BUCKET")
 
-
-app = Flask(__name__)
-
 #saving links for affiliation & article
-link_affiliation = 'https://insul-in-default-rtdb.firebaseio.com/affiliation_product.json?limitToLast=3&orderBy=%22$key%22'
-link_article = 'https://insul-in-default-rtdb.firebaseio.com/article.json?limitToLast=3&orderBy=%22$key%22'
+link_affiliation = 'https://insul-in-default-rtdb.firebaseio.com/affiliation_product.json'
+link_article = 'https://insul-in-default-rtdb.firebaseio.com/article.json'
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def homepage():
 
     # if request POST
     if request.method == 'POST':
 
-        # parse variable
-        age = request.form.get('age')
-        gender = request.form.get('gender')
-        polyuria = request.form.get('polyuria')
-        polydipsia = request.form.get('polydipsia')
-        weightLoss = request.form.get('weightLoss')
-        weakness = request.form.get('weightness')
-        polyphagia = request.form.get('polyphagia')
-        genital_thrus = request.form.get('genital_thrus')
-        itching = request.form.get('itching')
-        irritability = request.form.get('irritability')
-        delayed_healing = request.form.get('delayed_healing')
-        partial_paresis = request.form.get('partial_paresis')
-        muscle_stiffness = request.form.get('muscle_stiffness')
-        alopecia = request.form.get('alopecia')
-        obesity = request.form.get('obesity')
-
-        #inputing data to an object called userData
+        # parse variables & inputing it to an object called userData
         userData ={}
-        userData["age"] = age
-        userData["gender"] = gender
-        userData["polyuria"] = polyuria
-        userData["polydipsia"] = polydipsia
-        userData["weightLoss"] = weightLoss
-        userData["weakness"] = weakness
-        userData["polyphagia"] = polyphagia
-        userData["genital_thrus"] = genital_thrus
-        userData["itching"] = itching
-        userData["irritability"] = irritability
-        userData["delayed_healing"] = delayed_healing
-        userData["partial_paresis"] = partial_paresis
-        userData["muscle_stiffness"] = muscle_stiffness
-        userData["alopecia"] = alopecia
-        userData["obesity"] = obesity
+        userData["age"] = request.form.get('age')
+        userData["gender"] = request.form.get('gender')
+        userData["polyuria"] = request.form.get('polyuria')
+        userData["polydipsia"] = request.form.get('polydipsia')
+        userData["weight_loss"] = request.form.get('weight_loss')
+        userData["weakness"] = request.form.get('weakness')
+        userData["polyphagia"] = request.form.get('polyphagia')
+        userData["genital_thrus"] = request.form.get('genital_thrus')
+        userData["itching"] = request.form.get('itching')
+        userData["irritability"] = request.form.get('irritability')
+        userData["delayed_healing"] = request.form.get('delayed_healing')
+        userData["partial_paresis"] = request.form.get('partial_paresis')
+        userData["muscle_stiffness"] = request.form.get('muscle_stiffness')
+        userData["alopecia"] = request.form.get('alopecia')
+        userData["obesity"] = request.form.get('obesity')
 
         json_user = json.dumps(userData)
         json_loadUser= json.loads(json_user)
@@ -68,12 +51,11 @@ def homepage():
             #reading data from url
             with urllib.request.urlopen(link_article) as url:
                 article = json.loads(url.read().decode())
-
-                #Creating affiliation list
+                i = list(range(3))
                 x = {}
-                x["article"] = article
-
-                #merge result
+                x["article"] = random.sample(article, len(i))
+                
+                #merge
                 merged_result = { **json_loadUser, **x}
                 result= json.dumps(merged_result)
                 final_result= json.loads(result)
@@ -84,22 +66,21 @@ def homepage():
             #reading data from url
             with urllib.request.urlopen(link_affiliation) as url:
                 affiliation = json.loads(url.read().decode())
-
-                #Creating affiliation list
+                i = list(range(3))
                 x = {}
-                x["affiliation_product"] = affiliation
-
-                #merge result
+                x["affiliation_product"] = random.sample(affiliation, len(i))
+                
+                #merge
                 merged_result = { **json_loadUser, **x}
                 result= json.dumps(merged_result)
                 final_result= json.loads(result)
                 return final_result
-    
+        
     #if not POST
     userData ={
             "result_diagnose": bool(random.getrandbits(1)),
-            "error": bool(0),
-            "message": "success"
+            "error": bool(1),
+            "message": "method not supported"
         }
 
     json_user = json.dumps(userData)
@@ -110,12 +91,11 @@ def homepage():
         #reading data from url
         with urllib.request.urlopen(link_article) as url:
             article = json.loads(url.read().decode())
-
-            #Creating affiliation list
+            i = list(range(3))
             x = {}
-            x["article"] = article
+            x["article"] = random.sample(article, len(i))
 
-            #merge result
+            #merge
             merged_result = { **json_loadUser, **x}
             result= json.dumps(merged_result)
             final_result= json.loads(result)
@@ -126,12 +106,11 @@ def homepage():
         #reading data from url
         with urllib.request.urlopen(link_affiliation) as url:
             affiliation = json.loads(url.read().decode())
-
-            #Creating affiliation list
+            i = list(range(3))
             x = {}
-            x["affiliation_product"] = affiliation
+            x["affiliation_product"] = random.sample(affiliation, len(i))
 
-            #merge result
+            #merge
             merged_result = { **json_loadUser, **x}
             result= json.dumps(merged_result)
             final_result= json.loads(result)
