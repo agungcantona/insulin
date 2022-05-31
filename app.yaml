@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+service: prediction-api
 runtime: python
 env: flex
 entrypoint: gunicorn -b :$PORT main:app
@@ -23,4 +24,4 @@ env_variables:
   CLOUD_STORAGE_BUCKET: capstone-project-349802
 
 manual_scaling:
-  instances: 1
+  instances: 2
