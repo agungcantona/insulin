@@ -24,4 +24,4 @@ env_variables:
   CLOUD_STORAGE_BUCKET: capstone-project-349802
 
 manual_scaling:
-  instances: 2
+  instances: 1
